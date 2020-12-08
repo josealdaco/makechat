@@ -53,14 +53,18 @@ $(document).ready(()=>{
   });
 
   //Output the new message
-socket.on('new message', (data) => {
-  $('.message-container').append(`
-    <div class="message">
-      <p class="message-user">${data.sender}: </p>
-      <p class="message-text">${data.message}</p>
-    </div>
-  `);
-})
+  socket.on('new message', (data) => {
+    //Only append the message if the user is currently in that channel
+    let currentChannel = $('.channel-current').text();
+    if(currentChannel == data.channel){
+      $('.message-container').append(`
+        <div class="message">
+          <p class="message-user">${data.sender}: </p>
+          <p class="message-text">${data.message}</p>
+        </div>
+      `);
+    }
+  })
 
 // Add the new channel to the channels list (Fires for all clients)
 socket.on('new channel', (newChannel) => {
@@ -96,3 +100,19 @@ $('#new-channel-btn').click( () => {
     $('#new-channel-input').val("");
   }
 })
+
+$('#send-chat-btn').click((e) => {
+  e.preventDefault();
+  // Get the client's channel
+  let channel = $('.channel-current').text();
+  let message = $('#chat-input').val();
+  if(message.length > 0){
+    socket.emit('new message', {
+      sender : currentUser,
+      message : message,
+      //Send the channel over to the server
+      channel : channel
+    });
+    $('#chat-input').val("");
+  }
+});
