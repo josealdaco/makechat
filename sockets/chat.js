@@ -33,15 +33,27 @@ module.exports = (io, socket, onlineUsers, channels) => {
         messages : channels[newChannel]
       });
     })
+
+    socket.on('new channel', (newChannel) => {
+        console.log(newChannel);
+      })
+
+      socket.on('disconnect', () => {
+        //This deletes the user by using the username we saved to the socket
+        delete onlineUsers[socket.username]
+        io.emit('user has left', onlineUsers);
+      });
+
+      //Have the socket join the room of the channel
+      socket.on('user changed channel', (newChannel) => {
+        socket.join(newChannel);
+        socket.emit('user changed channel', {
+          channel : newChannel,
+          messages : channels[newChannel]
+        });
+    });
+
   }
-  socket.on('new channel', (newChannel) => {
-      console.log(newChannel);
-    })
+
   // This fires when a user closes out of the application
 // socket.on("disconnect") is a special listener that fires when a user exits out of the application.
-socket.on('disconnect', () => {
-  //This deletes the user by using the username we saved to the socket
-  delete onlineUsers[socket.username]
-  io.emit('user has left', onlineUsers);
-});
-}
