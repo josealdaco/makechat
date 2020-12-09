@@ -23,25 +23,17 @@ $(document).ready(()=>{
     }
   });
 
-  $('#send-chat-btn').click((e) => {
-    e.preventDefault();
-    // Get the message text value
-    let message = $('#chat-input').val();
-    // Make sure it's not empty
-    if(message.length > 0){
-      // Emit the message with the current user to the server
-      socket.emit('new message', {
-        sender : currentUser,
-        message : message,
-      });
-      $('#chat-input').val("");
-    }
-  });
+
 
   //socket listeners
-  socket.on('new user', (username) => {
+  socket.on('new user', (username, channels) => {
     console.log(`${username} has joined the chat`);
     $('.users-online').append(`<div class="user-online">${username}</div>`);
+    for(localchannel in channels){
+        if (localchannel != "General"){
+        $('.channels').append(`<div class="channel">${localchannel}</div>`);
+    }
+    }
   })
   socket.on('get online users', (onlineUsers) => {
     //You may have not have seen this for loop before. It's syntax is for(key in obj)
@@ -95,9 +87,6 @@ socket.on('user changed channel', (data) => {
     `);
   });
 })
-
-})
-
 $('#new-channel-btn').click( () => {
   let newChannel = $('#new-channel-input').val();
 
@@ -113,13 +102,15 @@ $('#send-chat-btn').click((e) => {
   // Get the client's channel
   let channel = $('.channel-current').text();
   let message = $('#chat-input').val();
+  console.log("Channel", channel)
   if(message.length > 0){
     socket.emit('new message', {
       sender : currentUser,
       message : message,
-      //Send the channel over to the server
-      channel : channel
+      channel : channel,
     });
     $('#chat-input').val("");
   }
 });
+
+})

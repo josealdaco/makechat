@@ -11,17 +11,19 @@ let channels = {"General" : []}
 
 io.on("connection", (socket) => {
   // Make sure to send the channels to our chat file
-  require('./sockets/chat.js')(io, socket, onlineUsers, channels);
+  require('./sockets/chat.js')(io, socket, onlineUsers, channels)
 })
 //app.js
 //Express View Engine for Handlebars
 const exphbs  = require('express-handlebars');
 app.engine('handlebars', exphbs());
 app.set('view engine', 'handlebars');
-//Establish your public folder
 app.use('/public', express.static('public'))
 
+//Establish your public folder
+
 app.get('/', (req, res) => {
+    console.log("Rendering")
   res.render('index.handlebars');
 })
 
