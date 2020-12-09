@@ -8,21 +8,36 @@ if(localStorage.getItem('name')) {
 
 
  currentUser = localStorage.getItem('name');
+
+
+
  $('.username-form').remove();
  $('.main-container').css('display', 'flex');
-console.log(currentUser)
+ socket.emit('new user', currentUser);
+
 }
 
+if(localStorage.getItem('channel')){
+    socket.emit('change Channel',localStorage.getItem('channel') )
+
+}else{
+    socket.emit('user changed channel', "General");
+
+}
+
+    // Get the online users from the server
+    socket.emit('get online users');
+    //Each user should be in the general channel by default.
 
 
-  // Get the online users from the server
-  socket.emit('get online users');
-  //Each user should be in the general channel by default.
-  socket.emit('user changed channel', "General");
+
+
+
 
   //Users can change the channel by clicking on its name.
   $(document).on('click', '.channel', (e)=>{
     let newChannel = e.target.textContent;
+    localStorage.setItem('channel', newChannel);
     socket.emit('user changed channel', newChannel);
   });
 
@@ -49,10 +64,13 @@ console.log(currentUser)
   //socket listeners
   socket.on('new user', (username, channels) => {
     console.log(`${username} has joined the chat`);
-    $('.users-online').append(`<div class="user-online">${username}</div>`);
+    if (document.getElementById(username) == undefined){
+    $('.users-online').append(`<div  id='${username}' class="user-online">${username}</div>`);
+
+    }
     for(localchannel in channels){
-        if (localchannel != "General"){
-        $('.channels').append(`<div class="channel">${localchannel}</div>`);
+        if (localchannel != "General" &&  document.getElementById(localchannel) == undefined){
+        $('.channels').append(`<div id ='${localchannel}' class="channel">${localchannel}</div>`);
     }
     }
   })
@@ -60,14 +78,16 @@ console.log(currentUser)
     //You may have not have seen this for loop before. It's syntax is for(key in obj)
     //Our usernames are keys in the object of onlineUsers.
     for(username in onlineUsers){
-      $('.users-online').append(`<div class="user-online">${username}</div>`);
+        if (document.getElementById(username) == undefined){
+      $('.users-online').append(`<div  id='${username}' class="user-online">${username}</div>`);
+    }
     }
 
-    if(localStorage.getItem('name')) {
+    //if(localStorage.getItem('name')) {
 
-        $('.users-online').append(`<div class="user-online">${localStorage.getItem('name')}</div>`);
+    //    $('.users-online').append(`<div class="user-online">${localStorage.getItem('name')}</div>`);
 
-    }
+    //}
 
 
   })
@@ -96,12 +116,18 @@ console.log(currentUser)
 
 // Add the new channel to the channels list (Fires for all clients)
 socket.on('new channel', (newChannel) => {
-  $('.channels').append(`<div class="channel">${newChannel}</div>`);
+
+  $('.channels').append(`<div  id = '${newChannel}' class="channel">${newChannel}</div>`);
+
+
+  //localStorage.removeItem('channels')
+
 });
 
 // Make the channel joined the current channel. Then load the messages.
 // This only fires for the client who made the channel.
 socket.on('user changed channel', (data) => {
+    console.log("Data from prev channel", data)
   $('.channel-current').addClass('channel');
   $('.channel-current').removeClass('channel-current');
   $(`.channel:contains('${data.channel}')`).addClass('channel-current');
