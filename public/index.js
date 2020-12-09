@@ -1,7 +1,20 @@
 //index.js
 $(document).ready(()=>{
+    let currentUser;
     const socket = io.connect();
-  let currentUser;
+
+if(localStorage.getItem('name')) {
+
+
+
+ currentUser = localStorage.getItem('name');
+ $('.username-form').remove();
+ $('.main-container').css('display', 'flex');
+console.log(currentUser)
+}
+
+
+
   // Get the online users from the server
   socket.emit('get online users');
   //Each user should be in the general channel by default.
@@ -12,9 +25,17 @@ $(document).ready(()=>{
     let newChannel = e.target.textContent;
     socket.emit('user changed channel', newChannel);
   });
+
+   $('#logoutbtn').click((e)=>{
+       localStorage.removeItem('name');
+
+
+   });
   $('#create-user-btn').click((e)=>{
-    e.preventDefault();
+
+
     if($('#username-input').val().length > 0){
+    localStorage.setItem('name', $('#username-input').val());
       socket.emit('new user', $('#username-input').val());
       // Save the current user when created
       currentUser = $('#username-input').val();
@@ -41,6 +62,14 @@ $(document).ready(()=>{
     for(username in onlineUsers){
       $('.users-online').append(`<div class="user-online">${username}</div>`);
     }
+
+    if(localStorage.getItem('name')) {
+
+        $('.users-online').append(`<div class="user-online">${localStorage.getItem('name')}</div>`);
+
+    }
+
+
   })
 
   //Refresh the online user list
